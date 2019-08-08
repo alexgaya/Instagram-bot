@@ -2,18 +2,27 @@ from selenium import webdriver
 import os
 import time
 import configparser
+import logging
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-class FamousAccountsScraping:
+if not os.path.exists('./error.log'):
+    open("error.log", "w")
+
+logger = logging.getLogger("__main__")
+logging.basicConfig(format='[DATE:  %(asctime)s]   [PROCESS:  %(process)d]   [TYPE:  %(levelname)s]    MESSAGE  ==>  %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S', filename='error.log')
+
+
+class SocialBlade:
 
     def __init__(self):
         self.driver = webdriver.Chrome('chromedriver.exe')
 
-    def socialblade_com(self):
+    def __call__(self):
         self.driver.get('https://socialblade.com/instagram/top/100/followers')
         time.sleep(2)
 
@@ -23,7 +32,7 @@ class FamousAccountsScraping:
             user = str(self.driver.find_element_by_xpath(
                 xpath).get_attribute('href'))
             user = user.replace('https://socialblade.com/instagram/user/', '')
-            print(user)
+            print(f'Attempting to fetch user --> @{user}')
             yield user
 
 
@@ -74,22 +83,19 @@ class InstagramBot:
         self.nav_user(user)
 
         time.sleep(5)
-        # follow_button = self.driver.find_element_by_xpath(
-        #     '//*[@id="react-root"]/section/main/div/header/section/div[1]/div[1]/span/span[1]/button')
-        # follow_button.click()
         clickable = True
         try:
             element = WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((
                 By.XPATH, '//*[@id="react-root"]/section/main/div/header/section/div[1]/div[1]/span/span[1]/button')))
             if self.isFollowing(element):
-                print('already following')
+                print('Already following')
                 return
             element.click()
             time.sleep(3)
             # //*[@id="react-root"]/section/main/div/header/section/div[1]/button
             # //*[@id="react-root"]/section/main/div/header/section/div[1]/div[1]/span/span[1]/button
         except:
-            print('Element is not clickable, trying with next...')
+            print('ERROR: Element is not clickable, trying with next method...')
             clickable = False
 
         if not clickable:
@@ -97,20 +103,20 @@ class InstagramBot:
                 element = WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((
                     By.XPATH, '//*[@id="react-root"]/section/main/div/header/section/div[1]/button')))
                 if self.isFollowing(element):
-                    print('already following')
+                    print('Already following.')
                     return
                 element.click()
                 time.sleep(3)
             except:
-                print('Element is not clickable, skiping user')
+                print('ERROR: Element is not clickable, skiping user.')
+                logger.error(f'Unable to follow user: @{user}')
 
         time.sleep(5)
 
 
 if __name__ == "__main__":
-
-    botAcc = FamousAccountsScraping()
-    botAcc.socialblade_com()
+    botAcc = SocialBlade()
+    botAcc()
 
     cparser = configparser.ConfigParser()
     cparser.read('./config.ini')

@@ -2,3 +2,4 @@ config.ini
 chromedriver.exe
 utility_methods/
 debug.log
+error.log
