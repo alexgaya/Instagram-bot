@@ -67,6 +67,9 @@ class InstagramBot:
             return True
         return False
 
+    def switched_to_following(self, button):
+        return self.isFollowing(button)
+
     def follow_user(self, user):
         self.nav_user(user)
 
@@ -79,8 +82,10 @@ class InstagramBot:
             element = WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((
                 By.XPATH, '//*[@id="react-root"]/section/main/div/header/section/div[1]/div[1]/span/span[1]/button')))
             if self.isFollowing(element):
+                print('already following')
                 return
             element.click()
+            time.sleep(3)
             # //*[@id="react-root"]/section/main/div/header/section/div[1]/button
             # //*[@id="react-root"]/section/main/div/header/section/div[1]/div[1]/span/span[1]/button
         except:
@@ -92,8 +97,10 @@ class InstagramBot:
                 element = WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((
                     By.XPATH, '//*[@id="react-root"]/section/main/div/header/section/div[1]/button')))
                 if self.isFollowing(element):
+                    print('already following')
                     return
                 element.click()
+                time.sleep(3)
             except:
                 print('Element is not clickable, skiping user')
 
